@@ -28,23 +28,22 @@ Post.prototype.validate=function(){
   if(this.data.title==""){this.errors.push("You must provide a title.")}
   if(this.data.body==""){this.errors.push("You must provide post content.")}
 }
-Post.prototype.create=function(){
-    return new Promise((resolve,reject)=>{
+Post.prototype.create= async function(){
       this.cleanUP();
       this.validate();
       if(!this.errors.length){
        //save post into database
-       postsCollection.insertOne(this.data).then((info)=>{
-          resolve(info.insertedId);
-       }).catch(()=>{
-         this.errors.push("Please try again lator.");
-         reject(this.errors);
-       });
+       try{
+         const info = await postsCollection.insertOne(this.data);
+          return info.insertedId;
+       }catch(err){
+          this.errors.push("Please try again lator.");
+          throw this.errors;
+       }
       }else{
-        reject(this.errors);
+        throw this.errors;
       }
-    })
-}
+   }
 Post.prototype.update=function(){
   return new Promise(async (resolve,reject)=>{
       try{
